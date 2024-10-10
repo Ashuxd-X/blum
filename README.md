@@ -1,6 +1,4 @@
-Here’s the README file formatted in Markdown for easy copying and pasting:
 
-```markdown
 # BlumAuto Installation Guide
 
 Follow this installation guide to set up BlumAuto.
