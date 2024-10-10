@@ -105,12 +105,12 @@ socks5://user:pass@127.0.0.1:6969
 
 2. Clone the repository:  
    ```bash
-   git clone https://github.com/Savanop121/blum.git
+   git clone git clone https://github.com/asish1346/blum.git
    ```
 
-3. Navigate to the `blumauto` directory:  
+3. Navigate to the `blum` directory:  
    ```bash
-   cd blumauto
+   cd blum
    ```
 
 4. Install the required libraries:  
