@@ -449,17 +449,19 @@ async def main():
     init()
     banner = f"""{Fore.GREEN}
  
-███████╗ █████╗ ██╗   ██╗ █████╗ ███╗   ██╗
-██╔════╝██╔══██╗██║   ██║██╔══██╗████╗  ██║
-███████╗███████║██║   ██║███████║██╔██╗ ██║
-╚════██║██╔══██║╚██╗ ██╔╝██╔══██║██║╚██╗██║
-███████║██║  ██║ ╚████╔╝ ██║  ██║██║ ╚████║
-╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚═╝  ╚═╝╚═╝  ╚═══╝
+   ('-.      .-')    ('-. .-.             
+  ( OO ).-. ( OO ). ( OO )  /             
+  / . --. /(_)---\_),--. ,--. ,--. ,--.   
+  | \-.  \ /    _ | |  | |  | |  | |  |   
+.-'-'  |  |\  :` `. |   .|  | |  | | .-') 
+ \| |_.'  | '..`''.)|       | |  |_|( OO )
+  |  .-.  |.-._)   \|  .-.  | |  | | `-' /
+  |  | |  |\       /|  | |  |('  '-'(_.-' 
+  `--' `--' `-----' `--' `--'  `-----'    
                                                                                                   
-    Auto Claim Bot For Blum - @savanop
-    Author  : Airdop script  : Thanks to @savan
-    Github  : https://github.com/Savanop121
-    Telegram: https://t.me/savanop121
+    Auto Claim Bot For Blum -Asʜᴜ || ☠️ xᴅ
+    Author  : Asʜᴜ || ☠️ xᴅ
+    Telegram: https://t.me/thilubhaii
         {Style.RESET_ALL}"""
     arg = argparse.ArgumentParser()
     arg.add_argument(
