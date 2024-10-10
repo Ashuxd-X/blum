@@ -1,9 +1,12 @@
-# BlumAuto
-Follow This Installation Guide https://t.me/savanop121
+Here’s the README file formatted in Markdown for easy copying and pasting:
 
-# Warning
+```markdown
+# BlumAuto Installation Guide
 
-"Users assume all responsibility and risk associated with the use of this bot/program script."
+Follow this installation guide to set up BlumAuto.
+
+> **Warning**  
+> "Users assume all responsibility and risk associated with the use of this bot/program script."
 
 ## Features
 
@@ -13,47 +16,47 @@ Follow This Installation Guide https://t.me/savanop121
 - ✅ Multi-Account Support
 - ✅ Auto Claim Bonus Referral
 - ✅ Auto Task Completion (details in [Config.json Overview](#configjson-overview))
-- ✅ Automated Game Play (random user input, see [Config.json Overview](#configjson-overview))
+- ✅ Automated Gameplay (random user input, see [Config.json Overview](#configjson-overview))
 
+## Registration
 
-# Register ?
+Click the following link to register: [Register Here](https://t.me/blum/app?startapp=ref_fyH24gm7nP)
 
-Click the following url to register : [https://t.me/BlumCryptoBot/app?startapp=ref_aPYIYj1oKc](https://t.me/blum/app?startapp=ref_naPVKFOOD1)
+## How to Use
 
-# How to Use
+### Bot.py Parameter Features
 
-## Bot.py parameter feature
+Here are some parameters to enable features:
 
-Here are some parameters to enable feature
+| Parameter | Description                                      |
+|-----------|--------------------------------------------------|
+| `--data`  | Set custom file data input (default: `data.txt`) |
 
-| parameter | description                                    |
-| --------- | ---------------------------------------------- |
-| --data    | set custom file data input (default: data.txt) |
+### About Config.json
 
-## About Config.json
+**Config.json Description:**
 
-Here Config.json Description
-| key                | description                                                                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| interval           | value type is integer/real number <br> interval is delay between accounts                                                                         |
-| auto_complete_task | value type is bool (true/false), enable (true) to active auto complete task                                                                       |
-| auto_play_game     | value type is bool (true/false), enable (true) to active auto play game                                                                           |
-| game_point         | value type is integer/real number<br>low : minimum points earned when playing the game <br><br>high : maximal points earned when playing the game |
+| Key                | Description                                                                                                                                     |
+|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `interval`         | Value type is integer/real number. <br> Specifies the delay between account actions.                                                          |
+| `auto_complete_task`| Value type is bool (true/false). Set to true to activate auto-completion of tasks.                                                           |
+| `auto_play_game`   | Value type is bool (true/false). Set to true to activate auto gameplay.                                                                        |
+| `game_point`       | Value type is integer/real number. <br> Low: Minimum points earned when playing the game. <br> High: Maximum points earned when playing the game. |
 
-## About Proxy
+### About Proxy
 
-Register on this site to get free proxy : [Here](https://www.webshare.io/)
+To get a free proxy, register at: [Webshare](https://www.webshare.io/)
 
-You can add your proxy list in `proxies.txt` and proxy format is like example below :
+You can add your proxy list in `proxies.txt`. The proxy format is as follows:
 
-Format :
+**Format:**
 
 ```
 http://host:port
 http://user:pass@host:port
 ```
 
-Example :
+**Example:**
 
 ```
 http://127.0.0.1:6969
@@ -62,153 +65,135 @@ socks5://127.0.0.1:6969
 socks5://user:pass@127.0.0.1:6969
 ```
 
-## Windows 
+## Installation Steps
 
-1. Make sure you computer was installed python and git.
-   
-   Suggestion: Use python version 3.8+ (3.8 and above or latest)
+### Windows
 
-   python site : [https://python.org](https://python.org)
-   
-   git site : [https://git-scm.com/](https://git-scm.com/)
+1. Ensure that Python and Git are installed on your computer.  
+   **Suggestion:** Use Python version 3.8 or above.  
+   - [Python Download](https://python.org)  
+   - [Git Download](https://git-scm.com/)
 
-2. Clone this repository
-   ```shell
+2. Clone the repository:  
+   ```bash
    git clone https://github.com/orrnobmahmud/blumauto.git
    ```
 
-3. goto blumauto directory
-   ```
+3. Navigate to the `blumauto` directory:  
+   ```bash
    cd blumauto
    ```
 
-4. install the require library
-   ```
+4. Install the required libraries:  
+   ```bash
    python -m pip install -r requirements.txt
    ```
 
-5. Edit `data.txt`, input you data token in `data.txt`, find you token in [How to Find Account Token](#how-to-find-account-token). One line for one data account, if you want add you second account add in new line!
+5. Edit `data.txt` to input your data token. Find your token in [How to Find Account Token](#how-to-find-account-token). Each line corresponds to one account token. To add a second account, add it on a new line.
 
-6. execute the main program 
-   ```
+6. Execute the main program:  
+   ```bash
    python bot.py
    ```
 
-## Linux
+### Linux
 
-1. Make sure you computer was installed python and git.
-   
-   Suggestion: Use python version 3.8+ (3.8 and above or latest)
-
-   python
-   ```shell
+1. Ensure that Python and Git are installed on your computer.  
+   **Suggestion:** Use Python version 3.8 or above.  
+   ```bash
    sudo apt install python3 python3-pip
-   ```
-   git
-   ```shell
    sudo apt install git
    ```
 
-2. Clone this repository
-   
-   ```shell
+2. Clone the repository:  
+   ```bash
    git clone https://github.com/Savanop121/blum.git
    ```
 
-3. goto blumauto directory
-
-   ```shell
+3. Navigate to the `blumauto` directory:  
+   ```bash
    cd blumauto
    ```
 
-4. Install the require library
-   
-   ```
+4. Install the required libraries:  
+   ```bash
    python3 -m pip install -r requirements.txt
    ```
 
-5. Edit `data.txt`, input you data token in `data.txt`, line for one data account, if you want add you second account add in new line!
+5. Edit `data.txt` to input your data token. Each line corresponds to one account token. To add a second account, add it on a new line.
 
-6. execute the main program 
-   ```
+6. Execute the main program:  
+   ```bash
    python bot.py
    ```
 
-## Termux
+### Termux
 
-1. Make sure you termux was installed python and git.
-   
-   python
-   ```
+1. Ensure that Python and Git are installed in Termux.  
+   ```bash
    pkg install python
-   ```
-
-   git
-   ```
    pkg install git
    ```
 
-2. Clone this repository
-   ```shell
+2. Clone the repository:  
+   ```bash
    git clone https://github.com/orrnobmahmud/blumauto.git
    ```
 
-3. goto blumauto directory
-   ```
+3. Navigate to the `blumauto` directory:  
+   ```bash
    cd blumauto
    ```
 
-4. install the require library
-   ```
+4. Install the required libraries:  
+   ```bash
    python -m pip install -r requirements.txt
    ```
 
-5. Edit `data.txt`, input you data token in `data.txt`. One line for one data account, if you want add you second account add in new line!
+5. Edit `data.txt` to input your data token. Each line corresponds to one account token. To add a second account, add it on a new line.
 
-6. execute the main program 
-   ```
+6. Execute the main program:  
+   ```bash
    python bot.py
    ```
 
-## Docker
+### Docker
 
-1. Make sure that docker is installed on your system.
-2. Edit `data.txt`, input you data token in `data.txt`. One line for one data account, if you want add you second account add in new line!
-3. Run docker container
+1. Ensure that Docker is installed on your system.
 
-   ```
+2. Edit `data.txt` to input your data token. Each line corresponds to one account token. To add a second account, add it on a new line.
+
+3. Run the Docker container:  
+   ```bash
    docker run -it \
      -v "./data.txt:/app/blumauto/data.txt" \
      ghcr.io/orrnobmahmud/blumauto:latest
    ```
 
-   or use compose:
-
-   ```
+   Or use Docker Compose:  
+   ```bash
    docker compose up
    ```
 
-# Javascript Command to Get Telegram Data for Desktop
+## Javascript Command to Get Telegram Data for Desktop
 
 ```javascript
 copy(Telegram.WebApp.initData)
 ```
 
-# Run for 24/7 
+## Running Continuously
 
-You can run the script continuously using a VPS or RDP. Use the screen application on a Linux VPS to keep the script running in the background.
+To run the script continuously, consider using a VPS or RDP. Use the `screen` application on a Linux VPS to keep the script running in the background.
 
-# Discussion
+## Discussion
 
-If you have any questions or need further assistance, join : https://t.me/savanop121
+For any questions or further assistance, please join: [Discussion Group](https://telegram.dog/lootersera_th)
 
 ## Q&A
 
-**Q: Is it necessary to use a proxy with this bot/program script?**
-
+**Q: Is it necessary to use a proxy with this bot/program script?**  
 **A:** No, using a proxy is not required for this bot/program script.
 
-**Q: How can I configure and use a proxy?**
-
+**Q: How can I configure and use a proxy?**  
 **A:** To use a proxy, simply fill out the `proxies.txt` file according to the provided format.
-
+```
