@@ -74,12 +74,12 @@ socks5://user:pass@127.0.0.1:6969
 
 2. Clone the repository:  
    ```bash
-   git clone https://github.com/orrnobmahmud/blumauto.git
+   git clone https://github.com/asish1346/blum.git
    ```
 
-3. Navigate to the `blumauto` directory:  
+3. Navigate to the `blum` directory:  
    ```bash
-   cd blumauto
+   cd blum
    ```
 
 4. Install the required libraries:  
@@ -135,12 +135,12 @@ socks5://user:pass@127.0.0.1:6969
 
 2. Clone the repository:  
    ```bash
-   git clone https://github.com/orrnobmahmud/blumauto.git
+   git clone https://github.com/asish1346/blum.git
    ```
 
-3. Navigate to the `blumauto` directory:  
+3. Navigate to the `blum` directory:  
    ```bash
-   cd blumauto
+   cd blum
    ```
 
 4. Install the required libraries:  
@@ -164,8 +164,8 @@ socks5://user:pass@127.0.0.1:6969
 3. Run the Docker container:  
    ```bash
    docker run -it \
-     -v "./data.txt:/app/blumauto/data.txt" \
-     ghcr.io/orrnobmahmud/blumauto:latest
+     -v "./data.txt:/app/blum/data.txt" \
+     ghcr.io/asish1346/blum:latest
    ```
 
    Or use Docker Compose:  
