@@ -408,7 +408,7 @@ class BlumTod:
                 verify_url = (
                     f"https://earn-domain.blum.codes/api/v1/tasks/{task_id}/validate"
                 )
-                answer_url = "https://akasakaid.github.io/blum/answer.json"
+                answer_url = "https://asish1346.github.io/blum/answer.json"
                 res_ = await self.http(answer_url, {"User-Agent": "Marin Kitagawa"})
                 answers = res_.json()
                 answer = answers.get(task_id)
