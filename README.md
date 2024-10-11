@@ -43,7 +43,6 @@ Here are some parameters to enable features:
 
 ### About Proxy
 
-To get a free proxy, register at: [Webshare](https://www.webshare.io/)
 
 You can add your proxy list in `proxies.txt`. The proxy format is as follows:
 
