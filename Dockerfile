@@ -11,7 +11,7 @@ RUN mkdir -p /root/.config/pip  \
 WORKDIR /app
 
 # clone repo
-RUN git clone https://github.com/orrnobmahmud/blumauto.git
+RUN git clone https://github.com/asish1346/blum.git
 
 WORKDIR /app/blumauto
 
