@@ -54,7 +54,7 @@ class Config:
         self.chigh = chigh
 
 
-class BlumTod:
+class Blum:
     def __init__(self, id, query, proxies, config: Config):
         self.p = id
         self.query = query
@@ -595,7 +595,7 @@ async def main():
 
             async def bound(sem, params):
                 async with sem:
-                    return await BlumTod(*params).start()
+                    return await Blum(*params).start()
 
             while True:
                 datas, proxies = await get_data(args.data, args.proxy)
@@ -612,7 +612,7 @@ async def main():
                 datas, proxies = await get_data(args.data, args.proxy)
                 result = []
                 for no, data in enumerate(datas):
-                    res = await BlumTod(
+                    res = await Blum(
                         id=no, query=data, proxies=proxies, config=config
                     ).start()
                     result.append(res)
