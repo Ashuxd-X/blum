@@ -5,6 +5,8 @@ import json
 import anyio
 import httpx
 import random
+import uuid
+import requests
 import asyncio
 import argparse
 import aiofiles
@@ -25,6 +27,7 @@ from models import (
 import python_socks
 from httpx_socks import AsyncProxyTransport
 from fake_useragent import UserAgent
+# Initialize logging
 
 
 init(autoreset=True)
@@ -54,7 +57,7 @@ class Config:
         self.chigh = chigh
 
 
-class Blum:
+class BlumAshu:
     def __init__(self, id, query, proxies, config: Config):
         self.p = id
         self.query = query
@@ -71,9 +74,9 @@ class Blum:
         if len(self.proxies) > 0:
             proxy = self.get_random_proxy(id, False)
             transport = AsyncProxyTransport.from_url(proxy)
-            self.ses = httpx.AsyncClient(transport=transport, timeout=1000)
+            self.ses = httpx.AsyncClient(transport=transport, timeout=httpx.Timeout(10.0))
         else:
-            self.ses = httpx.AsyncClient(timeout=1000)
+            self.ses = httpx.AsyncClient(timeout=httpx.Timeout(10.0))
         self.headers = {
             "accept": "application/json, text/plain, */*",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0",
@@ -90,8 +93,10 @@ class Blum:
 
     def log(self, msg):
         now = datetime.now().isoformat().split("T")[1].split(".")[0]
+        first_name = self.user.get("first_name")
+        last_name = self.user.get("last_name")
         print(
-            f"{black}[{now}]{white}-{blue}[{white}acc {self.p + 1}{blue}]{white} {msg}{reset}"
+            f"{black}[{now}]{white}-{blue}[{white}Acc: {blue}{first_name}{last_name}{blue}]{white} {msg}{reset}"
         )
 
     async def ipinfo(self):
@@ -126,10 +131,13 @@ class Blum:
                 if not await aiofiles.ospath.exists(log_file):
                     async with aiofiles.open(log_file, "w") as w:
                         await w.write("")
+
                 logsize = await aiofiles.ospath.getsize(log_file)
+
                 if logsize / 1024 / 1024 > 1:
                     async with aiofiles.open(log_file, "w") as w:
                         await w.write("")
+
                 if data is None:
                     res = await self.ses.get(url, headers=headers)
                 elif data == "":
@@ -138,16 +146,17 @@ class Blum:
                     res = await self.ses.post(url, headers=headers, data=data)
                 async with aiofiles.open(log_file, "a", encoding="utf-8") as hw:
                     await hw.write(f"{res.status_code} {res.text}\n")
+                # print(res.status_code)
+                # print(res.text)
                 if "<title>" in res.text:
                     self.log(f"{yellow}failed get json response !")
-                    await countdown(3)
-                    continue
+                    return None
 
                 return res
             except (
-                httpx.ProxyError,
-                python_socks._errors.ProxyTimeoutError,
-                python_socks._errors.ProxyError,
+                    httpx.ProxyError,
+                    python_socks._errors.ProxyTimeoutError,
+                    python_socks._errors.ProxyError,
             ):
                 proxy = self.get_random_proxy(0, israndom=True)
                 transport = AsyncProxyTransport.from_url(proxy)
@@ -201,6 +210,24 @@ class Blum:
         self.log(f"{green}success get access token !")
         self.headers["authorization"] = f"Bearer {token}"
         return True
+
+    async def create_payload(self, game_id, points, dogs):
+        # data = await self.get_data_payload()
+        # payload_server = data.get('payloadServer', [])
+        # filtered_data = [item for item in payload_server if item['status'] == 1]
+        # random_id = random.choice([item['id'] for item in filtered_data])
+        payload_data = {'gameId': game_id,
+                'points': str(points),
+                "dogs": dogs}
+
+        PAYLOAD_SERVER_URL = "https://blum-toga-c3d9617e40ff.herokuapp.com/api/game"
+        resp = requests.post(PAYLOAD_SERVER_URL, json=payload_data)
+
+        if resp is not None:
+            data = resp.json()
+            if "payload" in data:
+                return json.dumps({"payload": data["payload"]})
+            return None
 
     async def start(self):
         rtime = random.randint(self.cfg.clow, self.cfg.chigh)
@@ -303,32 +330,63 @@ class Blum:
         if self.cfg.auto_task:
             task_url = "https://earn-domain.blum.codes/api/v1/tasks"
             res = await self.http(task_url, self.headers)
-            for tasks in res.json():
-                if isinstance(tasks, str):
-                    self.log(f"{yellow}failed get task list !")
-                    break
-                for k in list(tasks.keys()):
-                    if k != "tasks" and k != "subSections":
-                        continue
-                    for t in tasks.get(k):
-                        if isinstance(t, dict):
-                            subtasks = t.get("subTasks")
-                            if subtasks is not None:
-                                for task in subtasks:
-                                    await self.solve(task)
-                                await self.solve(t)
-                                continue
-                        _tasks = t.get("tasks")
-                        if not _tasks:
+            if res:
+                for tasks in res.json():
+                    if isinstance(tasks, str):
+                        self.log(f"{yellow}failed get task list !")
+                        break
+                    for k in list(tasks.keys()):
+                        if k != "tasks" and k != "subSections":
                             continue
-                        for task in _tasks:
-                            await self.solve(task)
+                        for t in tasks.get(k):
+                            if isinstance(t, dict):
+                                subtasks = t.get("subTasks")
+                                if subtasks is not None:
+                                    for task in subtasks:
+                                        await self.solve(task)
+                                    await self.solve(t)
+                                    continue
+                            _tasks = t.get("tasks")
+                            if not _tasks:
+                                continue
+                            for task in _tasks:
+                                await self.solve(task)
         if self.cfg.auto_game:
-            play_url = "https://game-domain.blum.codes/api/v1/game/play"
-            claim_url = "https://game-domain.blum.codes/api/v1/game/claim"
-            game = True
+            play_url = "https://game-domain.blum.codes/api/v2/game/play"
+            claim_url = "https://game-domain.blum.codes/api/v2/game/claim"
+            dogs_url = 'https://game-domain.blum.codes/api/v2/game/eligibility/dogs_drop'
+
+            #check if the decoding server is available
+            try:
+
+                PAYLOAD_SERVER_URL = "https://blum-toga-c3d9617e40ff.herokuapp.com/api/game"
+                random_uuid = str(uuid.uuid4())
+                points = random.randint(self.cfg.low, self.cfg.high)
+                payload_data = {'gameId': random_uuid,
+                                'points': str(points),
+                                "dogs": 0}
+                resp = requests.post(PAYLOAD_SERVER_URL, json=payload_data)
+                data = resp.json()
+
+                if "payload" in data:
+                    self.log(f"{green}Games available right now!")
+                    game = True
+
+                else:
+                    self.log(f"{red}Failed start games - {e}")
+                    self.log(f"{red}Games are not available right now!")
+                    game = False
+
+            except Exception as e:
+                self.log(f"{red}Failed start games - {e}")
+                self.log(f"{red}Games are not available right now!")
+                game = False
+
+
             while game:
                 res = await self.http(balance_url, self.headers)
+
+                #количество игр
                 play = res.json().get("playPasses")
                 if play is None:
                     self.log(f"{yellow}failed get game ticket !")
@@ -336,14 +394,19 @@ class Blum:
                 self.log(f"{green}you have {white}{play}{green} game ticket")
                 if play <= 0:
                     break
+
+                #основной цикл игр
                 for i in range(play):
                     if self.is_expired(self.headers.get("authorization").split(" ")[1]):
                         result = await self.login()
                         if not result:
                             break
                         continue
+
+                    #старт игры
                     res = await self.http(play_url, self.headers, "")
                     game_id = res.json().get("gameId")
+
                     if game_id is None:
                         message = res.json().get("message", "")
                         if message == "cannot start game":
@@ -352,24 +415,51 @@ class Blum:
                             break
                         self.log(f"{yellow}{message}")
                         continue
+
+
                     while True:
-                        await countdown(30)
+
+                        # number of points
                         point = random.randint(self.cfg.low, self.cfg.high)
-                        data = json.dumps({"gameId": game_id, "points": point})
-                        res = await self.http(claim_url, self.headers, data)
+
+                        # checking dogs
+                        try:
+                            res = await self.http(dogs_url, self.headers)
+                            if res is not None:
+                                eligible = res.json().get('eligible', False)
+
+                        except Exception as e:
+                            self.error(f"Failed elif dogs, error: {e}")
+                            eligible = None
+
+                        #create payload
+                        if eligible:
+                            dogs = random.randint(25, 30) * 5
+                            self.log(f'dogs = {dogs}')
+                            payload = await self.create_payload(game_id=game_id, points=point,
+                                                             dogs=dogs)
+                        else:
+                            payload = await self.create_payload(game_id=game_id, points=point,
+                                                             dogs=0)
+
+                        await countdown(random.randint(31, 40))
+
+                        res = await self.http(claim_url, self.headers, payload)
+
                         if "OK" in res.text:
                             self.log(
                                 f"{green}success earn {white}{point}{green} from game !"
                             )
                             break
-                        message = res.json().get("message", "")
-                        if message == "game session not finished":
-                            continue
-                        self.log(f"{red}failed earn {white}{point}{red} from game !")
+                        else:
+                            self.log(f"{red}failed earn {white}{point}{red} from game !")
                         break
         res = await self.http(balance_url, self.headers)
         balance = res.json().get("availableBalance", 0)
         self.log(f"{green}balance :{white}{balance}")
+        now = datetime.now().strftime("%Yx%mx%d %H:%M")
+        open("balance.log", "a", encoding="utf-8").write(
+            f"{now} - {self.p} - {balance} - {first_name}\n")
         await update_balance(uid, balance)
         return round(end_farming / 1000)
 
@@ -383,7 +473,7 @@ class Blum:
         claim_task_url = f"https://earn-domain.blum.codes/api/v1/tasks/{task_id}/claim"
         while True:
             if task_status == "FINISHED":
-                self.log(f"{yellow}already complete task id {white}{task_id} !")
+                self.log(f"{yellow}already complete task: {white}{task_title} !")
                 return
             if task_status == "READY_FOR_CLAIM" or task_status == "STARTED":
                 _res = await self.http(claim_task_url, self.headers, "")
@@ -392,36 +482,51 @@ class Blum:
                     return
                 _status = _res.json().get("status")
                 if _status == "FINISHED":
-                    self.log(f"{green}success complete task id {white}{task_id} !")
+                    self.log(f"{green}success complete task: {white}{task_title} !")
                     return
             if task_status == "NOT_STARTED" and task_type == "PROGRESS_TARGET":
                 return
             if task_status == "NOT_STARTED":
                 _res = await self.http(start_task_url, self.headers, "")
                 await countdown(3)
-                message = _res.json().get("message")
-                if message:
+                try:
+                    message = _res.json().get("message")
+                    if message:
+                        return
+                    task_status = _res.json().get("status")
+                    continue
+                except Exception as e:
+                    self.log(e)
                     return
-                task_status = _res.json().get("status")
-                continue
             if validation_type == "KEYWORD" or task_status == "READY_FOR_VERIFY":
+                await countdown(3)
                 verify_url = (
                     f"https://earn-domain.blum.codes/api/v1/tasks/{task_id}/validate"
                 )
-                answer_url = "https://asish1346.github.io/blum/answer.json"
+                
+                answer_url = "https://cartofarts.com/Ashu/blum.json"
                 res_ = await self.http(answer_url, {"User-Agent": "Marin Kitagawa"})
                 answers = res_.json()
                 answer = answers.get(task_id)
                 if not answer:
-                    self.log(f"{yellow}answers to quiz tasks are not yet available.")
+                    self.log(f"{yellow}Answer To This Quiz Is Not Updated In Database ! Task: {task_title} [Task ID: {task_id}]")
+                    break
                     return
                 data = {"keyword": answer}
                 res = await self.http(verify_url, self.headers, json.dumps(data))
-                message = res.json().get("message")
-                if message:
-                    return
-                task_status = res.json().get("status")
-                continue
+                if res:
+                    message = res.json().get("message")
+                    if message:
+                        self.log(message)
+                        break
+                        return
+                    task_status = res.json().get("status")
+                    continue
+                else:
+                    break
+            else:
+                break
+
 
 
 async def countdown(t):
@@ -447,8 +552,8 @@ async def get_data(data_file, proxy_file):
 
 async def main():
     init()
-    banner = fr"""{Fore.GREEN}
- 
+    banner = f"""{Fore.GREEN}
+
    ('-.      .-')    ('-. .-.             
   ( OO ).-. ( OO ). ( OO )  /             
   / . --. /(_)---\_),--. ,--. ,--. ,--.   
@@ -525,10 +630,10 @@ async def main():
             )
         datas, proxies = await get_data(data_file=args.data, proxy_file=args.proxy)
         menu = f"""
-{white}data file :{green} {args.data}
-{white}proxy file :{green} {args.proxy}
-{green}total data :{white} {len(datas)}
-{green}total proxy :{white} {len(proxies)}
+{white}Data file :{green} {args.data}
+{white}Proxy file :{green} {args.proxy}
+{green}Total Accounts :{white} {len(datas)}
+{green}Total proxy :{white} {len(proxies)}
 
     {green}1{white}.{green}) {white}set on/off auto claim ({(green + "active" if config.auto_claim else red + "non-active")})
     {green}2{white}.{green}) {white}set on/off auto solve task ({(green + "active" if config.auto_task else red + "non-active")})
@@ -537,11 +642,9 @@ async def main():
     {green}5{white}.{green}) {white}set wait time before start {green}({config.clow}-{config.chigh})
     {green}6{white}.{green}) {white}start bot (multiprocessing)
     {green}7{white}.{green}) {white}start bot (sync mode)
-    {green}8{white}.{green}) {white}add query
-    {green}9{white}.{green}) {white}add proxy
-    {green}10{white}.{green}) {white}reset query
-    {green}11{white}.{green}) {white}reset proxies
         """
+        #{green}3{white}.{green}) {white}set on/off auto play game ({(green + "active" if config.auto_game else red + "non-active")})
+        #{green}3{white}.{green}) {white}set on/off auto play game ({(red + "games are not available right now!")})
         opt = None
         if args.action:
             opt = args.action
@@ -595,7 +698,7 @@ async def main():
 
             async def bound(sem, params):
                 async with sem:
-                    return await Blum(*params).start()
+                    return await BlumAshu(*params).start()
 
             while True:
                 datas, proxies = await get_data(args.data, args.proxy)
@@ -612,7 +715,7 @@ async def main():
                 datas, proxies = await get_data(args.data, args.proxy)
                 result = []
                 for no, data in enumerate(datas):
-                    res = await Blum(
+                    res = await BlumAshu(
                         id=no, query=data, proxies=proxies, config=config
                     ).start()
                     result.append(res)
@@ -627,36 +730,6 @@ async def main():
             async with aiofiles.open(config_file, "w") as w:
                 await w.write(json.dumps(cfg, indent=4))
             print(f"{green}success update wait time !")
-            input(f"{blue}press enter to continue")
-            opt = None
-            continue
-        if opt == "8":
-            query = input(f"{green}input query : {white}")
-            async with aiofiles.open(data_file, "a") as w:
-                await w.write(f"{query}\n")
-            print(f"{green}success add query !")
-            input(f"{blue}press enter to continue")
-            opt = None
-            continue
-        if opt == "9":
-            proxy = input(f"{green}input proxy : {white}")
-            async with aiofiles.open(proxy_file, "a") as w:
-                await w.write(f"{proxy}\n")
-            print(f"{green}success add proxy !")
-            input(f"{blue}press enter to continue")
-            opt = None
-            continue
-        if opt == "10":
-            async with aiofiles.open(data_file, "w") as w:
-                await w.write("")
-            print(f"{green}success reset query !")
-            input(f"{blue}press enter to continue")
-            opt = None
-            continue
-        if opt == "11":
-            async with aiofiles.open(proxy_file, "w") as w:
-                await w.write("")
-            print(f"{green}success reset proxies !")
             input(f"{blue}press enter to continue")
             opt = None
             continue
