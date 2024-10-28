@@ -193,4 +193,3 @@ For any questions or further assistance, please join: [Discussion Group](https:/
 
 **Q: How can I configure and use a proxy?**  
 **A:** To use a proxy, simply fill out the `proxies.txt` file according to the provided format.
-```
