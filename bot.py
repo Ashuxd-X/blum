@@ -3,6 +3,7 @@ import re
 import sys
 import json
 import anyio
+from payload import get_payload
 import httpx
 import random
 import uuid
@@ -57,7 +58,7 @@ class Config:
         self.chigh = chigh
 
 
-class BlumAshu:
+class BlumTod:
     def __init__(self, id, query, proxies, config: Config):
         self.p = id
         self.query = query
@@ -93,10 +94,8 @@ class BlumAshu:
 
     def log(self, msg):
         now = datetime.now().isoformat().split("T")[1].split(".")[0]
-        first_name = self.user.get("first_name")
-        last_name = self.user.get("last_name")
         print(
-            f"{black}[{now}]{white}-{blue}[{white}Acc: {blue}{first_name}{last_name}{blue}]{white} {msg}{reset}"
+            f"{black}[{now}]{white}-{blue}[{white}acc {self.p + 1}{blue}]{white} {msg}{reset}"
         )
 
     async def ipinfo(self):
@@ -220,14 +219,17 @@ class BlumAshu:
                 'points': str(points),
                 "dogs": dogs}
 
-        PAYLOAD_SERVER_URL = "https://blum-toga-c3d9617e40ff.herokuapp.com/api/game"
+        PAYLOAD_SERVER_URL = "https://server2.ggtog.live/api/game"
         resp = requests.post(PAYLOAD_SERVER_URL, json=payload_data)
 
         if resp is not None:
-            data = resp.json()
-            if "payload" in data:
-                return json.dumps({"payload": data["payload"]})
-            return None
+            try:
+                data = resp.json()
+                if "payload" in data:
+                    return json.dumps({"payload": data["payload"]})
+            except Exception as e:
+                self.log(e)
+                return None
 
     async def start(self):
         rtime = random.randint(self.cfg.clow, self.cfg.chigh)
@@ -312,7 +314,7 @@ class BlumAshu:
                 end_farming = farming.get("endTime")
                 if timestamp > (end_farming / 1000):
                     res_ = await self.http(farming_claim_url, self.headers, "")
-                    if res_.status_code != 200:
+                    if res_ and res_.status_code != 200:
                         self.log(f"{red}failed claim farming !")
                     else:
                         self.log(f"{green}success claim farming !")
@@ -356,17 +358,10 @@ class BlumAshu:
             claim_url = "https://game-domain.blum.codes/api/v2/game/claim"
             dogs_url = 'https://game-domain.blum.codes/api/v2/game/eligibility/dogs_drop'
 
-            #check if the decoding server is available
             try:
-
-                PAYLOAD_SERVER_URL = "https://blum-toga-c3d9617e40ff.herokuapp.com/api/game"
                 random_uuid = str(uuid.uuid4())
-                points = random.randint(self.cfg.low, self.cfg.high)
-                payload_data = {'gameId': random_uuid,
-                                'points': str(points),
-                                "dogs": 0}
-                resp = requests.post(PAYLOAD_SERVER_URL, json=payload_data)
-                data = resp.json()
+                point = random.randint(self.cfg.low, self.cfg.high)
+                data = await get_payload(gameId=random_uuid, points=point)
 
                 if "payload" in data:
                     self.log(f"{green}Games available right now!")
@@ -374,19 +369,45 @@ class BlumAshu:
 
                 else:
                     self.log(f"{red}Failed start games - {e}")
-                    self.log(f"{red}Games are not available right now!")
+                    self.log(f"{red}Install node.js!")
                     game = False
-
             except Exception as e:
                 self.log(f"{red}Failed start games - {e}")
-                self.log(f"{red}Games are not available right now!")
+                self.log(f"{red}Install node.js!")
                 game = False
+
+
+           #check if the decoding server is available
+            # try:
+            #
+            #     PAYLOAD_SERVER_URL = "https://server2.ggtog.live/api/game"
+            #     random_uuid = str(uuid.uuid4())
+            #     points = random.randint(self.cfg.low, self.cfg.high)
+            #     payload_data = {'gameId': random_uuid,
+            #                     'points': str(points),
+            #                     "dogs": 0}
+            #     resp = requests.post(PAYLOAD_SERVER_URL, json=payload_data)
+            #     data = resp.json()
+            #
+            #     if "payload" in data:
+            #         self.log(f"{green}Games available right now!")
+            #         game = True
+            #
+            #     else:
+            #         self.log(f"{red}Failed start games - {e}")
+            #         self.log(f"{red}Games are not available right now!")
+            #         game = False
+            #
+            # except Exception as e:
+            #     self.log(f"{red}Failed start games - {e}")
+            #     self.log(f"{red}Games are not available right now!")
+            #     game = False
 
 
             while game:
                 res = await self.http(balance_url, self.headers)
 
-                #количество игр
+               #number of games
                 play = res.json().get("playPasses")
                 if play is None:
                     self.log(f"{yellow}failed get game ticket !")
@@ -395,7 +416,7 @@ class BlumAshu:
                 if play <= 0:
                     break
 
-                #основной цикл игр
+               #main series of games
                 for i in range(play):
                     if self.is_expired(self.headers.get("authorization").split(" ")[1]):
                         result = await self.login()
@@ -403,7 +424,7 @@ class BlumAshu:
                             break
                         continue
 
-                    #старт игры
+                  #game start
                     res = await self.http(play_url, self.headers, "")
                     game_id = res.json().get("gameId")
 
@@ -419,10 +440,10 @@ class BlumAshu:
 
                     while True:
 
-                        # number of points
+                       # number of points
                         point = random.randint(self.cfg.low, self.cfg.high)
 
-                        # checking dogs
+                       # check dogs
                         try:
                             res = await self.http(dogs_url, self.headers)
                             if res is not None:
@@ -432,15 +453,15 @@ class BlumAshu:
                             self.error(f"Failed elif dogs, error: {e}")
                             eligible = None
 
-                        #create payload
+                       #create payload
                         if eligible:
                             dogs = random.randint(25, 30) * 5
                             self.log(f'dogs = {dogs}')
-                            payload = await self.create_payload(game_id=game_id, points=point,
-                                                             dogs=dogs)
+                            # payload = await self.create_payload(game_id=game_id, points=point,dogs=dogs)
+                            payload = await get_payload(gameId=game_id, points=point)
                         else:
-                            payload = await self.create_payload(game_id=game_id, points=point,
-                                                             dogs=0)
+                            # payload = await self.create_payload(game_id=game_id, points=point,dogs=0)
+                            payload = await get_payload(gameId=game_id, points=point)
 
                         await countdown(random.randint(31, 40))
 
@@ -473,7 +494,7 @@ class BlumAshu:
         claim_task_url = f"https://earn-domain.blum.codes/api/v1/tasks/{task_id}/claim"
         while True:
             if task_status == "FINISHED":
-                self.log(f"{yellow}already complete task: {white}{task_title} !")
+                self.log(f"{yellow}already complete task id {white}{task_title} !")
                 return
             if task_status == "READY_FOR_CLAIM" or task_status == "STARTED":
                 _res = await self.http(claim_task_url, self.headers, "")
@@ -482,7 +503,7 @@ class BlumAshu:
                     return
                 _status = _res.json().get("status")
                 if _status == "FINISHED":
-                    self.log(f"{green}success complete task: {white}{task_title} !")
+                    self.log(f"{green}success complete task id {white}{task_title} !")
                     return
             if task_status == "NOT_STARTED" and task_type == "PROGRESS_TARGET":
                 return
@@ -503,13 +524,13 @@ class BlumAshu:
                 verify_url = (
                     f"https://earn-domain.blum.codes/api/v1/tasks/{task_id}/validate"
                 )
-                
+               
                 answer_url = "https://cartofarts.com/Ashu/blum.json"
                 res_ = await self.http(answer_url, {"User-Agent": "Marin Kitagawa"})
                 answers = res_.json()
                 answer = answers.get(task_id)
                 if not answer:
-                    self.log(f"{yellow}Answer To This Quiz Is Not Updated In Database ! Task: {task_title} [Task ID: {task_id}]")
+                    self.log(f"{yellow}answers to quiz tasks are not yet available.")
                     break
                     return
                 data = {"keyword": answer}
@@ -553,16 +574,15 @@ async def get_data(data_file, proxy_file):
 async def main():
     init()
     banner = f"""{Fore.GREEN}
-
-   ('-.      .-')    ('-. .-.             
-  ( OO ).-. ( OO ). ( OO )  /             
-  / . --. /(_)---\_),--. ,--. ,--. ,--.   
+    ('-.      .-')    ('-. .-.             
+   ( OO ).-. ( OO ). ( OO )  /             
+   / . --. /(_)---\_),--. ,--. ,--. ,--.   
   | \-.  \ /    _ | |  | |  | |  | |  |   
-.-'-'  |  |\  :` `. |   .|  | |  | | .-') 
- \| |_.'  | '..`''.)|       | |  |_|( OO )
-  |  .-.  |.-._)   \|  .-.  | |  | | `-' /
-  |  | |  |\       /|  | |  |('  '-'(_.-' 
-  `--' `--' `-----' `--' `--'  `-----'    
+ .-'-'  |  |\  :` `. |   .|  | |  | | .-') 
+  \| |_.'  | '..`''.)|       | |  |_|( OO )
+   |  .-.  |.-._)   \|  .-.  | |  | | `-' /
+   |  | |  |\       /|  | |  |('  '-'(_.-' 
+   `--' `--' `-----' `--' `--'  `-----'    
                                                                                                   
     Auto Claim Bot For Blum -Asʜᴜ || ☠️ xᴅ
     Author  : Asʜᴜ || ☠️ xᴅ
@@ -630,10 +650,10 @@ async def main():
             )
         datas, proxies = await get_data(data_file=args.data, proxy_file=args.proxy)
         menu = f"""
-{white}Data file :{green} {args.data}
-{white}Proxy file :{green} {args.proxy}
-{green}Total Accounts :{white} {len(datas)}
-{green}Total proxy :{white} {len(proxies)}
+{white}data file :{green} {args.data}
+{white}proxy file :{green} {args.proxy}
+{green}total data :{white} {len(datas)}
+{green}total proxy :{white} {len(proxies)}
 
     {green}1{white}.{green}) {white}set on/off auto claim ({(green + "active" if config.auto_claim else red + "non-active")})
     {green}2{white}.{green}) {white}set on/off auto solve task ({(green + "active" if config.auto_task else red + "non-active")})
@@ -698,7 +718,7 @@ async def main():
 
             async def bound(sem, params):
                 async with sem:
-                    return await BlumAshu(*params).start()
+                    return await BlumTod(*params).start()
 
             while True:
                 datas, proxies = await get_data(args.data, args.proxy)
@@ -715,7 +735,7 @@ async def main():
                 datas, proxies = await get_data(args.data, args.proxy)
                 result = []
                 for no, data in enumerate(datas):
-                    res = await BlumAshu(
+                    res = await BlumTod(
                         id=no, query=data, proxies=proxies, config=config
                     ).start()
                     result.append(res)
