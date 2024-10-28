@@ -530,7 +530,7 @@ class BlumTod:
                 answers = res_.json()
                 answer = answers.get(task_id)
                 if not answer:
-                    self.log(f"{yellow}answers to quiz tasks are not yet available.")
+                    self.log(f"{yellow}Answer To This Quiz Is Not Updated In Database ! Task: {task_title} [Task ID: {task_id}]")
                     break
                     return
                 data = {"keyword": answer}
