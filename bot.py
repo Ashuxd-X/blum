@@ -28,31 +28,6 @@ from models import (
 import python_socks
 from httpx_socks import AsyncProxyTransport
 from fake_useragent import UserAgent
-# Importing necessary modules for licensing
-from licensing.models import *
-from licensing.methods import Key, Helpers
-
-# Initialize RSA Public Key and Authentication Key
-RSAPubKey = "<RSAKeyValue><Modulus>oPIn7id+tMI9eypGoTCsur/hiLHoGyz1Um1om8OjejOq5WnYlXg55JKwdIPIJQIKbJeNLBzrPs9ca7K9jxZT5+Ms9JQMCYHoxfJcghN49nR3i6FrPtzkZUrqAQKygvkyIH9P5crWJXqAkTMqVrVR56oHzPe1FfzZn64UHz/zLxONvzDT98JJj/CUwiewyxj7pRhVWz59cuHJAgXtwARxj+G2gq0l1oMTkQi2ICtrIRneqZXnZHDvOa9DIrDZUliAYeIRTEWBioTIuQq/h4O2KjEXuY8/hVP89Z7uMcTwGjPr84r9eQygp6W2csGx6tdK1CAxJUXhmy1GwvdunBNzPw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>"  # RSA Key
-auth = "WyI5NjgwNjQ1NyIsIk5lN0NJdlFJd2FNbW14Y05iZUNBNkUza2dobXJnNnlMTGx0eEdoQzgiXQ=="       # Auth Key
-
-# Define the async authentication function
-async def Authkey():
-    key = str(input(" Enter Auth Key: "))
-    result = Key.activate(
-        token=auth,
-        rsa_pub_key=RSAPubKey,
-        product_id='27900',
-        key=key,
-        machine_code=Helpers.GetMachineCode()
-    )
-    if result[0] is None or not Helpers.IsOnRightMachine(result[0]):
-        print("The license does not work: {0}".format(result[1]))
-        return False  # Indicate failure to authenticate
-    else:
-        print("The license is valid!")
-        return True   # Indicate success
-
 
 init(autoreset=True)
 red = Fore.LIGHTRED_EX
@@ -595,15 +570,6 @@ async def get_data(data_file, proxy_file):
 
 
 async def main():
-    # Authenticate license key
-    auth_success = await Authkey()
-    
-    # Check if authentication was successful
-    if not auth_success:
-        print("Exiting due to failed authentication.")
-        return  # Exit if authentication fails
-
-    # Continue with initializing the bot if authenticated
     init()
     banner = f"""{Fore.GREEN}
     ('-.      .-')    ('-. .-.             
