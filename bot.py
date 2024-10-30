@@ -16,7 +16,7 @@ from base64 import b64decode
 import aiofiles.ospath
 from colorama import init, Fore, Style
 from urllib.parse import parse_qs
-from datetime import datetime
+from datetime import datetime as dt
 from models import (
     get_by_id,
     update_useragent,
@@ -28,7 +28,31 @@ from models import (
 import python_socks
 from httpx_socks import AsyncProxyTransport
 from fake_useragent import UserAgent
+# Initialize logging
+from licensing.models import *
+from licensing.methods import Key, Helpers
 
+# Initialize RSA Public Key and Authentication Key
+RSAPubKey = "<RSAKeyValue><Modulus>oPIn7id+tMI9eypGoTCsur/hiLHoGyz1Um1om8OjejOq5WnYlXg55JKwdIPIJQIKbJeNLBzrPs9ca7K9jxZT5+Ms9JQMCYHoxfJcghN49nR3i6FrPtzkZUrqAQKygvkyIH9P5crWJXqAkTMqVrVR56oHzPe1FfzZn64UHz/zLxONvzDT98JJj/CUwiewyxj7pRhVWz59cuHJAgXtwARxj+G2gq0l1oMTkQi2ICtrIRneqZXnZHDvOa9DIrDZUliAYeIRTEWBioTIuQq/h4O2KjEXuY8/hVP89Z7uMcTwGjPr84r9eQygp6W2csGx6tdK1CAxJUXhmy1GwvdunBNzPw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>"  # RSA Key
+auth = "WyI5NjgwNjQ1NyIsIk5lN0NJdlFJd2FNbW14Y05iZUNBNkUza2dobXJnNnlMTGx0eEdoQzgiXQ=="       # Auth Key
+
+# Define the async authentication function
+async def Authkey():
+    key = str(input(" Enter Auth Key: "))
+    result = Key.activate(
+        token=auth,
+        rsa_pub_key=RSAPubKey,
+        product_id='27900',
+        key=key,
+        machine_code=Helpers.GetMachineCode()
+    )
+    if result[0] is None or not Helpers.IsOnRightMachine(result[0]):
+        print("The license does not work: {0}".format(result[1]))
+        return False  # Indicate failure to authenticate
+    else:
+        print("The license is valid!")
+        return True   # Indicate success
+        
 init(autoreset=True)
 red = Fore.LIGHTRED_EX
 blue = Fore.LIGHTBLUE_EX
@@ -91,7 +115,7 @@ class BlumTod:
         }
 
     def log(self, msg):
-        now = datetime.now().isoformat().split("T")[1].split(".")[0]
+        now = dt.now().isoformat().split("T")[1].split(".")[0]
         print(
             f"{black}[{now}]{white}-{blue}[{white}acc {self.p + 1}{blue}]{white} {msg}{reset}"
         )
@@ -180,7 +204,7 @@ class BlumTod:
         header, payload, sign = token.split(".")
         payload = b64decode(payload + "==").decode()
         jload = json.loads(payload)
-        now = round(datetime.now().timestamp()) + 300
+        now = round(dt.now().timestamp()) + 300
         exp = jload["exp"]
         if now > exp:
             return True
@@ -233,7 +257,7 @@ class BlumTod:
         rtime = random.randint(self.cfg.clow, self.cfg.chigh)
         await countdown(rtime)
         if not self.valid:
-            return int(datetime.now().timestamp()) + (3600 * 8)
+            return int(dt.now().timestamp()) + (3600 * 8)
         balance_url = "https://game-domain.blum.codes/api/v1/user/balance"
         friend_balance_url = "https://user-domain.blum.codes/api/v1/friends/balance"
         farming_claim_url = "https://game-domain.blum.codes/api/v1/farming/claim"
@@ -258,7 +282,7 @@ class BlumTod:
         if expired:
             result = await self.login()
             if not result:
-                return int(datetime.now().timestamp()) + 300
+                return int(dt.now().timestamp()) + 300
         else:
             self.headers["authorization"] = f"Bearer {token}"
         res = await self.http(checkin_url, self.headers)
@@ -271,7 +295,7 @@ class BlumTod:
             res = await self.http(balance_url, self.headers)
             timestamp = res.json().get("timestamp")
             if timestamp == 0:
-                timestamp = int(datetime.now().timestamp() * 1000)
+                timestamp = int(dt.now().timestamp() * 1000)
             if not timestamp:
                 continue
             timestamp = timestamp / 1000
@@ -279,8 +303,8 @@ class BlumTod:
         balance = res.json().get("availableBalance", 0)
         await update_balance(uid, balance)
         farming = res.json().get("farming")
-        end_iso = datetime.now().isoformat(" ")
-        end_farming = int(datetime.now().timestamp() * 1000) + random.randint(
+        end_iso = dt.now().isoformat(" ")
+        end_farming = int(dt.now().timestamp() * 1000) + random.randint(
             3600000, 7200000
         )
         self.log(f"{green}balance : {white}{balance}")
@@ -321,7 +345,7 @@ class BlumTod:
                 else:
                     self.log(f"{yellow}not time to claim farming !")
                 end_iso = (
-                    datetime.fromtimestamp(end_farming / 1000)
+                    dt.fromtimestamp(end_farming / 1000)
                     .isoformat(" ")
                     .split(".")[0]
                 )
@@ -476,7 +500,7 @@ class BlumTod:
         res = await self.http(balance_url, self.headers)
         balance = res.json().get("availableBalance", 0)
         self.log(f"{green}balance :{white}{balance}")
-        now = datetime.now().strftime("%Yx%mx%d %H:%M")
+        now = dt.now().strftime("%Yx%mx%d %H:%M")
         open("balance.log", "a", encoding="utf-8").write(
             f"{now} - {self.p} - {balance} - {first_name}\n")
         await update_balance(uid, balance)
@@ -570,6 +594,10 @@ async def get_data(data_file, proxy_file):
 
 
 async def main():
+    auth_success = await Authkey()
+    if not auth_success:
+        print("Exiting due to failed authentication.")
+        return  # Exit if authentication fails
     init()
     banner = f"""{Fore.GREEN}
     ('-.      .-')    ('-. .-.             
@@ -725,7 +753,7 @@ async def main():
                     for no, data in enumerate(datas)
                 ]
                 result = await asyncio.gather(*tasks)
-                end = int(datetime.now().timestamp())
+                end = int(dt.now().timestamp())
                 total = min(result) - end
                 await countdown(total)
         if opt == "7":
@@ -737,7 +765,7 @@ async def main():
                         id=no, query=data, proxies=proxies, config=config
                     ).start()
                     result.append(res)
-                end = int(datetime.now().timestamp())
+                end = int(dt.now().timestamp())
                 total = min(result) - end
                 await countdown(total)
         if opt == "5":
