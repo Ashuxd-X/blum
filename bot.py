@@ -544,11 +544,7 @@ async def get_data(data_file, proxy_file):
     return datas, proxies
 
 
-async def main():
-    auth_success = await Authkey()
-    if not auth_success:
-        print("Exiting due to failed authentication.")
-        return  # Exit if authentication fails
+async def main()# Exit if authentication fails
     init()
     banner = f"""{Fore.GREEN}
     ('-.      .-')    ('-. .-.             
