@@ -544,7 +544,7 @@ async def get_data(data_file, proxy_file):
     return datas, proxies
 
 
-async def main()# Exit if authentication fails
+async def main(): 
     init()
     banner = f"""{Fore.GREEN}
     ('-.      .-')    ('-. .-.             
