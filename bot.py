@@ -16,7 +16,7 @@ from base64 import b64decode
 import aiofiles.ospath
 from colorama import init, Fore, Style
 from urllib.parse import parse_qs
-from datetime import datetime as dt
+from datetime import datetime
 from models import (
     get_by_id,
     update_useragent,
@@ -28,7 +28,9 @@ from models import (
 import python_socks
 from httpx_socks import AsyncProxyTransport
 from fake_useragent import UserAgent
-        
+# Initialize logging
+
+
 init(autoreset=True)
 red = Fore.LIGHTRED_EX
 blue = Fore.LIGHTBLUE_EX
@@ -91,7 +93,7 @@ class BlumTod:
         }
 
     def log(self, msg):
-        now = dt.now().isoformat().split("T")[1].split(".")[0]
+        now = datetime.now().isoformat().split("T")[1].split(".")[0]
         print(
             f"{black}[{now}]{white}-{blue}[{white}acc {self.p + 1}{blue}]{white} {msg}{reset}"
         )
@@ -180,7 +182,7 @@ class BlumTod:
         header, payload, sign = token.split(".")
         payload = b64decode(payload + "==").decode()
         jload = json.loads(payload)
-        now = round(dt.now().timestamp()) + 300
+        now = round(datetime.now().timestamp()) + 300
         exp = jload["exp"]
         if now > exp:
             return True
@@ -208,6 +210,12 @@ class BlumTod:
         self.headers["authorization"] = f"Bearer {token}"
         return True
 
+    # async def get_data_payload(self):
+    #     url = 'https://raw.githubusercontent.com/zuydd/database/main/blum.json'
+    #     data = requests.get(url=url)
+    #     return data.json()
+
+
     async def create_payload(self, game_id, points, dogs):
         # data = await self.get_data_payload()
         # payload_server = data.get('payloadServer', [])
@@ -233,7 +241,7 @@ class BlumTod:
         rtime = random.randint(self.cfg.clow, self.cfg.chigh)
         await countdown(rtime)
         if not self.valid:
-            return int(dt.now().timestamp()) + (3600 * 8)
+            return int(datetime.now().timestamp()) + (3600 * 8)
         balance_url = "https://game-domain.blum.codes/api/v1/user/balance"
         friend_balance_url = "https://user-domain.blum.codes/api/v1/friends/balance"
         farming_claim_url = "https://game-domain.blum.codes/api/v1/farming/claim"
@@ -258,7 +266,7 @@ class BlumTod:
         if expired:
             result = await self.login()
             if not result:
-                return int(dt.now().timestamp()) + 300
+                return int(datetime.now().timestamp()) + 300
         else:
             self.headers["authorization"] = f"Bearer {token}"
         res = await self.http(checkin_url, self.headers)
@@ -271,7 +279,7 @@ class BlumTod:
             res = await self.http(balance_url, self.headers)
             timestamp = res.json().get("timestamp")
             if timestamp == 0:
-                timestamp = int(dt.now().timestamp() * 1000)
+                timestamp = int(datetime.now().timestamp() * 1000)
             if not timestamp:
                 continue
             timestamp = timestamp / 1000
@@ -279,8 +287,8 @@ class BlumTod:
         balance = res.json().get("availableBalance", 0)
         await update_balance(uid, balance)
         farming = res.json().get("farming")
-        end_iso = dt.now().isoformat(" ")
-        end_farming = int(dt.now().timestamp() * 1000) + random.randint(
+        end_iso = datetime.now().isoformat(" ")
+        end_farming = int(datetime.now().timestamp() * 1000) + random.randint(
             3600000, 7200000
         )
         self.log(f"{green}balance : {white}{balance}")
@@ -321,7 +329,7 @@ class BlumTod:
                 else:
                     self.log(f"{yellow}not time to claim farming !")
                 end_iso = (
-                    dt.fromtimestamp(end_farming / 1000)
+                    datetime.fromtimestamp(end_farming / 1000)
                     .isoformat(" ")
                     .split(".")[0]
                 )
@@ -355,12 +363,13 @@ class BlumTod:
             play_url = "https://game-domain.blum.codes/api/v2/game/play"
             claim_url = "https://game-domain.blum.codes/api/v2/game/claim"
             dogs_url = 'https://game-domain.blum.codes/api/v2/game/eligibility/dogs_drop'
-            game = True         
 
+            game = True
             # try:
             #     random_uuid = str(uuid.uuid4())
             #     point = random.randint(self.cfg.low, self.cfg.high)
             #     data = await get_payload(gameId=random_uuid, points=point, freeze=None)
+            #
             #     if "payload" in data:
             #         self.log(f"{green}Games available right now!")
             #         game = True
@@ -369,17 +378,17 @@ class BlumTod:
             #         self.log(f"{red}Failed start games - {e}")
             #         self.log(f"{red}Install node.js!")
             #         game = False
-            #
             # except Exception as e:
             #     self.log(f"{red}Failed start games - {e}")
             #     self.log(f"{red}Install node.js!")
             #     game = False
 
 
+
             while game:
                 res = await self.http(balance_url, self.headers)
 
-               #number of games
+                #количество игр
                 play = res.json().get("playPasses")
                 if play is None:
                     self.log(f"{yellow}failed get game ticket !")
@@ -388,7 +397,7 @@ class BlumTod:
                 if play <= 0:
                     break
 
-               #main series of games
+                #основной цикл игр
                 for i in range(play):
                     if self.is_expired(self.headers.get("authorization").split(" ")[1]):
                         result = await self.login()
@@ -396,7 +405,7 @@ class BlumTod:
                             break
                         continue
 
-                  #game start
+                    #старт игры
                     res = await self.http(play_url, self.headers, "")
                     game_id = res.json().get("gameId")
 
@@ -412,10 +421,10 @@ class BlumTod:
 
                     while True:
 
-                       # number of points
+                        # количество очков
                         point = random.randint(self.cfg.low, self.cfg.high)
 
-                       # check dogs
+                        # проверяем догс
                         try:
                             res = await self.http(dogs_url, self.headers)
                             if res is not None:
@@ -424,9 +433,9 @@ class BlumTod:
                         except Exception as e:
                             self.error(f"Failed elif dogs, error: {e}")
                             eligible = None
-                        freeze_count = random.randint(*[4, 8])                            
 
-                       #create payload
+                        freeze_count = random.randint(*[4, 8])
+                        #создаем payload
                         if eligible:
                             dogs = random.randint(25, 30) * 5
                             self.log(f'dogs = {dogs}')
@@ -434,12 +443,11 @@ class BlumTod:
                             payload = await get_payload(gameId=game_id, points=point, freeze=freeze_count)
                         else:
                             # payload = await self.create_payload(game_id=game_id, points=point,dogs=0)
-                            payload = await get_payload(gameId=game_id, points=point, freeze=freeze_count)
+                            payload = await get_payload(gameId=game_id, points=point,freeze=freeze_count)
 
                         await countdown(30 + freeze_count * 5)
 
                         res = await self.http(claim_url, self.headers, payload)
-
                         if res and "OK" in res.text:
                             self.log(
                                 f"{green}success earn {white}{point}{green} from game !"
@@ -451,7 +459,7 @@ class BlumTod:
         res = await self.http(balance_url, self.headers)
         balance = res.json().get("availableBalance", 0)
         self.log(f"{green}balance :{white}{balance}")
-        now = dt.now().strftime("%Yx%mx%d %H:%M")
+        now = datetime.now().strftime("%Yx%mx%d %H:%M")
         open("balance.log", "a", encoding="utf-8").write(
             f"{now} - {self.p} - {balance} - {first_name}\n")
         await update_balance(uid, balance)
@@ -459,6 +467,7 @@ class BlumTod:
 
     async def solve(self, task: dict):
         task_id = task.get("id")
+        answers_local = json.loads(open("answers.json").read())
         task_title = task.get("title")
         task_status = task.get("status")
         task_type = task.get("type")
@@ -497,15 +506,16 @@ class BlumTod:
                 verify_url = (
                     f"https://earn-domain.blum.codes/api/v1/tasks/{task_id}/validate"
                 )
-               
                 answer_url = "https://cartofarts.com/Ashu/blum.json"
                 res_ = await self.http(answer_url, {"User-Agent": "Marin Kitagawa"})
                 answers = res_.json()
                 answer = answers.get(task_id)
                 if not answer:
-                    self.log(f"{yellow}Answer To This Quiz Is Not Updated In Database ! Task: {task_title} [Task ID: {task_id}]")
-                    break
-                    return
+                    answer = answers_local.get(task_id)
+                    if not answer:
+                        self.log(f"{yellow}answers to quiz tasks are not yet available! Task id: {task_id}")
+                        break
+                        return
                 data = {"keyword": answer}
                 res = await self.http(verify_url, self.headers, json.dumps(data))
                 if res:
@@ -544,7 +554,7 @@ async def get_data(data_file, proxy_file):
     return datas, proxies
 
 
-async def main(): 
+async def main():
     init()
     banner = f"""{Fore.GREEN}
     ('-.      .-')    ('-. .-.             
@@ -700,7 +710,7 @@ async def main():
                     for no, data in enumerate(datas)
                 ]
                 result = await asyncio.gather(*tasks)
-                end = int(dt.now().timestamp())
+                end = int(datetime.now().timestamp())
                 total = min(result) - end
                 await countdown(total)
         if opt == "7":
@@ -712,7 +722,7 @@ async def main():
                         id=no, query=data, proxies=proxies, config=config
                     ).start()
                     result.append(res)
-                end = int(dt.now().timestamp())
+                end = int(datetime.now().timestamp())
                 total = min(result) - end
                 await countdown(total)
         if opt == "5":
