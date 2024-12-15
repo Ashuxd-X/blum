@@ -6,7 +6,6 @@
 - [Prerequisites](#prerequisites)
 - [Obtaining API Keys](#obtaining-api-keys)
 - [Installation](#installation)
-- [Support](#support-this-project)
 - [Contacts](#contacts)
 
 > [!WARNING]
