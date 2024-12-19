@@ -451,7 +451,7 @@ class Tapper:
 
     async def validate_task(self, task, http_client: cloudscraper.CloudScraper):
         url = f"{tasks_api}/{task['id']}/validate"
-        ans = requests.get("https://raw.githubusercontent.com/asish1346/blum/refs/heads/main/answers.json")
+        ans = requests.get("https://raw.githubusercontent.com/Ashuxd-X/blum/refs/heads/main/answers.json")
         answer = ans.json()
         vid_ans = answer.get(task['id'])
         if not vid_ans:
