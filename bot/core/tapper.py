@@ -42,7 +42,7 @@ me_api = f"{user_end_point}/user/me"
 friend_balance_api = f"{user_end_point}/friends/balance"
 time_api = f"{game_end_point}/time/now"
 user_balance_api = f"{game_end_point}/user/balance"
-daily_rw_api = f"{game_end_point}/daily-reward?offset=-420"
+daily_rw_api = f"{game_end_point_v2}/daily-reward?offset=-420"
 tribe_api = f"{tribe_end_point}/tribe/16ff530b-e219-41a9-a9e5-cf2275c5663d/join"
 tribe_info_api = f"{tribe_end_point}/tribe/my"
 dogs_eligible_api = f"{game_end_point_v2}/game/eligibility/dogs_drop"
@@ -179,7 +179,7 @@ class Tapper:
             ip = response_json.get('ip', 'NO')
             country = response_json.get('country', 'NO')
 
-            logger.info(f"{self.session_name} |🟩 Logging in with proxy IP {ip} and country {country}")
+            logger.info(f"{self.session_name} |ðŸŸ© Logging in with proxy IP {ip} and country {country}")
         except Exception as error:
             logger.error(f"{self.session_name} | Proxy: {proxy} | Error: {error}")
 
@@ -321,16 +321,36 @@ class Tapper:
             res = http_client.get(daily_rw_api)
             if res.status_code == 200:
                 info = res.json()
-                days = info['days'][-1]
+                # Log the full response for debugging
+                logger.info(f"{self.session_name} | Daily reward API response: {info}")
+            
+                # Check if 'claim' is unavailable
+                if info.get('claim') == "unavailable":
+                    logger.info(f"{self.session_name} | Daily rewards already claimed today!")
+                    return
+        
+            # Get current streak days
+                streak_days = info.get('currentStreakDays', 0)
+            
+                # Handle todayReward being either a dictionary or an unexpected type
+                reward = info.get('todayReward', {})
+                if isinstance(reward, dict):
+                    passes = reward.get('passes', 0)
+                    points = reward.get('points', 0)
+                else:
+                    passes = points = 0  # Default if todayReward is not a dictionary
+            
+                # Attempt to claim daily reward
                 claim = http_client.post(daily_rw_api)
                 if claim.status_code == 200:
                     logger.success(
-                        f'{self.session_name} | <green>Successfully claimed daily rewards - Current streak: <cyan>{days["ordinal"]}</cyan></green>')
+                        f'{self.session_name} | <green>Successfully claimed daily rewards - Current streak: <cyan>{streak_days}</cyan> days, Passes: <cyan>{passes}</cyan>, Points: <cyan>{points}</cyan></green>'
+                    )
             else:
-                logger.info(f"{self.session_name} | Daily rewards already claimed today!")
-
+                logger.info(f"{self.session_name} | Failed to fetch daily rewards!")
         except Exception as e:
             logger.warning(f"{self.session_name} | Unknown error during claiming daily rewards: {e}")
+
 
     async def join_tribe(self, http_client: cloudscraper.CloudScraper):
         try:
@@ -637,15 +657,15 @@ class Tapper:
                     user_info = f"""
                     ====<cyan>{self.session_name}</cyan>====
                     USER INFO
-                        ├── BP Balance: <cyan>{self.user_balance}</cyan> BP
-                        ├── Total play passes: <cyan>{self.play_passes}</cyan>
-                        ├── Farming: <red>{is_farming}</red>
-                        └── Dogs drop: <red>{self.dogs_eligible}</red>
+                        â”œâ”€â”€ BP Balance: <cyan>{self.user_balance}</cyan> BP
+                        â”œâ”€â”€ Total play passes: <cyan>{self.play_passes}</cyan>
+                        â”œâ”€â”€ Farming: <red>{is_farming}</red>
+                        â””â”€â”€ Dogs drop: <red>{self.dogs_eligible}</red>
                     
                     FRENS INFO:
-                        ├── Total invited: <cyan>{friend_info['usedInvitation']}</cyan>
-                        ├── Amount for claim: <cyan>{friend_info['amountForClaim']}</cyan>
-                        └── Can claim: <red>{friend_info['canClaim']}</red>
+                        â”œâ”€â”€ Total invited: <cyan>{friend_info['usedInvitation']}</cyan>
+                        â”œâ”€â”€ Amount for claim: <cyan>{friend_info['amountForClaim']}</cyan>
+                        â””â”€â”€ Can claim: <red>{friend_info['canClaim']}</red>
                     """
 
                     logger.info(user_info)
