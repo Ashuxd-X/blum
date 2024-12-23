@@ -179,7 +179,7 @@ class Tapper:
             ip = response_json.get('ip', 'NO')
             country = response_json.get('country', 'NO')
 
-            logger.info(f"{self.session_name} |ðŸŸ© Logging in with proxy IP {ip} and country {country}")
+            logger.info(f"{self.session_name} |🟩 Logging in with proxy IP {ip} and country {country}")
         except Exception as error:
             logger.error(f"{self.session_name} | Proxy: {proxy} | Error: {error}")
 
@@ -657,15 +657,15 @@ class Tapper:
                     user_info = f"""
                     ====<cyan>{self.session_name}</cyan>====
                     USER INFO
-                        â”œâ”€â”€ BP Balance: <cyan>{self.user_balance}</cyan> BP
-                        â”œâ”€â”€ Total play passes: <cyan>{self.play_passes}</cyan>
-                        â”œâ”€â”€ Farming: <red>{is_farming}</red>
-                        â””â”€â”€ Dogs drop: <red>{self.dogs_eligible}</red>
+                        ├── BP Balance: <cyan>{self.user_balance}</cyan> BP
+                        ├── Total play passes: <cyan>{self.play_passes}</cyan>
+                        ├── Farming: <red>{is_farming}</red>
+                        └── Dogs drop: <red>{self.dogs_eligible}</red>
                     
                     FRENS INFO:
-                        â”œâ”€â”€ Total invited: <cyan>{friend_info['usedInvitation']}</cyan>
-                        â”œâ”€â”€ Amount for claim: <cyan>{friend_info['amountForClaim']}</cyan>
-                        â””â”€â”€ Can claim: <red>{friend_info['canClaim']}</red>
+                        ├── Total invited: <cyan>{friend_info['usedInvitation']}</cyan>
+                        ├── Amount for claim: <cyan>{friend_info['amountForClaim']}</cyan>
+                        └── Can claim: <red>{friend_info['canClaim']}</red>
                     """
 
                     logger.info(user_info)
